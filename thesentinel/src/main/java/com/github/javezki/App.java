@@ -22,6 +22,8 @@ public class App {
         App app = new App();
         if (!(app.propertiesExists())) app.createProperties();
         if (app.getKey().equals("")) app.setKey(app.userInputKey());
+
+        Sentinel sentinel = new Sentinel(app.getKey());
     }
 
     /**
