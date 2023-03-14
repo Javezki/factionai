@@ -6,10 +6,9 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
+public class Sentinel {
 
-public class Sentinel{
-
-    private static JDA jda;
+    public static JDA jda;
 
     public Sentinel(String botKey) {
         initBot(botKey);
@@ -23,16 +22,30 @@ public class Sentinel{
         JDABuilder builder = JDABuilder.createDefault(botKey);
         builder.setActivity(Activity.playing("Testing things for Javezki lol"));
         jda = builder
-        .addEventListeners(new EchoCommand())
-        .build();
+                .addEventListeners(new EchoCommand(), 
+                new EventCommand()
+                )
+                .build();
         initSlashCommands();
     }
 
     private void initSlashCommands() {
         jda.updateCommands().addCommands(
-            Commands.slash("say", "Repeats messages back to you")
-            .addOption(OptionType.STRING, "message", "The message to repeat", true)
+                Commands.slash("say", "Repeats messages back to you")
+                        .addOption(OptionType.STRING, "message", "The message to repeat", true),
+                Commands.slash("seteventchannel", "Sets the current channel as the main event channel")
+                .setGuildOnly(true),
+                Commands.slash("createevent", "Creates a new event")
+                        .addOption(OptionType.STRING, "type", "The type of event (raid, patrol, blitz etc.)", true)
+                        .addOption(OptionType.INTEGER, "time", "In how long the event will begin (minutes)", true)
+                        .addOption(OptionType.STRING, "code", "The private server code you are going to use", true)
+                        .addOption(OptionType.INTEGER, "atendees", "The amount of atendees required", false)
+                        .addOption(OptionType.STRING, "description", "A description of the event", false)
+                        .addOption(OptionType.STRING, "co-host", "A list of co-hosts")
+                        .setGuildOnly(true),
+                Commands.slash("setlogchannel", "This command will set the current channel as the log channel")
+
         ).queue();
     }
-    
+
 }
