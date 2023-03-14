@@ -15,6 +15,6 @@ public class AppTest
     @Test
     public void shouldAnswerWithTrue()
     {
-        App app = new App();
+        SentinelMain app = new SentinelMain();
     }
 }

@@ -1,0 +1,7 @@
+com\github\javezki\Sentinel.class
+com\github\javezki\SentinelLog.class
+com\github\javezki\EventCommand.class
+com\github\javezki\Config.class
+com\github\javezki\EchoCommand.class
+com\github\javezki\SentinelMain.class
+com\github\javezki\SentinelEvent.class
