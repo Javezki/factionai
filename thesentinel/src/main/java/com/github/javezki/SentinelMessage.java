@@ -16,9 +16,8 @@ public class SentinelMessage {
     }
 
     private void sendToLog(SentinelEvent event) {
-        Config config = new Config();
-        String logID = config.getKey(EventCommand.LOGID_KEY_VALUE);
-        String eventChannelID = config.getKey(EventCommand.CHANNELID_KEY_VALUE);
+        String logID = Config.getValue(EventCommand.LOGID_KEY_VALUE);
+        String eventChannelID = Config.getValue(EventCommand.CHANNELID_KEY_VALUE);
         TextChannel channel = Sentinel.jda.getTextChannelById(logID);
         EmbedBuilder builder = new EmbedBuilder();
         String eventLink = Sentinel.jda
@@ -36,7 +35,7 @@ public class SentinelMessage {
 
     private String appendMessage(List<User> userList) {
         String userListString = "";
-        for (User user : userList) userListString = userListString + "\n" + user.getName();
+        for (User user : userList) userListString = userListString + "\n<@" + user.getId() + ">";
         return userListString;
     }
 

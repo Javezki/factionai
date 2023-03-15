@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jobrunr.jobs.JobId;
 import org.jobrunr.scheduling.BackgroundJob;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -17,7 +18,6 @@ public class SentinelEvent {
 
     private SlashCommandInteractionEvent ev;
     private List<OptionMapping> nonBlankOptions = new ArrayList<>();
-    private Config config;
     private String embedID;
     private int timeToEvent;
     private String psCode;
@@ -27,8 +27,8 @@ public class SentinelEvent {
 
 
     public SentinelEvent(SlashCommandInteractionEvent ev) {
+ 
         this.ev = ev;
-        config = new Config();
         this.timeToEvent = ev.getOption("time").getAsInt();
         this.psCode = ev.getOption("code").getAsString();
         getAllNonNullOptions();
@@ -49,7 +49,7 @@ public class SentinelEvent {
     }
 
     private boolean isChannel() {
-        if (!(ev.getChannel().getId().equals(config.getKey(EventCommand.CHANNELID_KEY_VALUE))))
+        if (!(ev.getChannel().getId().equals(Config.getValue(EventCommand.CHANNELID_KEY_VALUE))))
             return false;
         return true;
     }
@@ -79,9 +79,10 @@ public class SentinelEvent {
         embedID = eventMessage.getId();
         ev.reply("Event Successfully Created!").setEphemeral(true).queue();
 
-        BackgroundJob.schedule(Instant.now().plusSeconds(timeToEvent*60), () -> {
+        JobId id = BackgroundJob.schedule(Instant.now().plusSeconds(timeToEvent*60), () -> {
             new SentinelMessage().onEventStart(psCode, embedID);
         });
+        EventCommand.addJob(this, id);
     }
         // for (User user : attendingUsersList) {
         //     user.openPrivateChannel().queue(channel -> {

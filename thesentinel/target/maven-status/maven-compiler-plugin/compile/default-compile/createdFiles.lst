@@ -1,4 +1,6 @@
 com\github\javezki\Sentinel.class
+com\github\javezki\SentinelEmbeds.class
+com\github\javezki\SentinelMessage.class
 com\github\javezki\SentinelLog.class
 com\github\javezki\EventCommand.class
 com\github\javezki\Config.class

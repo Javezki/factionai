@@ -1,7 +1,6 @@
 package com.github.javezki;
 
 import org.jobrunr.configuration.JobRunr;
-import org.jobrunr.server.JobActivator;
 import org.jobrunr.storage.InMemoryStorageProvider;
 
 /**
@@ -17,11 +16,10 @@ public class SentinelMain {
         .useBackgroundJobServer()
         .useDashboard(8000)
         .initialize();
-        Config config = new Config();
-        if (!(config.propertiesExists())) config.createProperties();
-        if (config.getKey(Config.DISCORD_KEY_VALUE).equals("")) 
-            config.setProperty(Config.DISCORD_KEY_VALUE, config.userInputKey());
+        if (!(Config.propertiesExists())) Config.createProperties();
+        if (Config.getValue(Config.DISCORD_KEY_VALUE).equals("")) 
+            Config.setProperty(Config.DISCORD_KEY_VALUE, Config.userInputKey());
 
-        Sentinel sentinel = new Sentinel(config.getKey(Config.DISCORD_KEY_VALUE));
+        Sentinel sentinel = new Sentinel(Config.getValue(Config.DISCORD_KEY_VALUE));
     }
 }

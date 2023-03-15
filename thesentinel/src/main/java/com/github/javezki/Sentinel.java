@@ -44,7 +44,13 @@ public class Sentinel {
                         .addOption(OptionType.STRING, "co-host", "A list of co-hosts")
                         .setGuildOnly(true),
                 Commands.slash("setlogchannel", "This command will set the current channel as the log channel")
-
+                        .setGuildOnly(true),
+                Commands.slash("seteventaccess", "This command will set the role that will have access to the permission")
+                        .setGuildOnly(true)
+                        .addOption(OptionType.ROLE, "role", "The role that will have access", true),
+                Commands.slash("cancelevent", "Cancels an event")
+                        .addOption(OptionType.STRING, "eventid", "The embed ID of the event you created", true)
+                        .setGuildOnly(true)
         ).queue();
     }
 
