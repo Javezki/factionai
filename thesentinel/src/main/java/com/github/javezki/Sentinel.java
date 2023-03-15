@@ -20,7 +20,7 @@ public class Sentinel {
      */
     private void initBot(String botKey) {
         JDABuilder builder = JDABuilder.createDefault(botKey);
-        builder.setActivity(Activity.playing("Testing things for Javezki lol"));
+        builder.setActivity(Activity.playing("With Punch's Balls"));
         jda = builder
                 .addEventListeners(new EchoCommand(), 
                 new SentinelEventListener()
@@ -39,9 +39,13 @@ public class Sentinel {
                         .addOption(OptionType.STRING, "type", "The type of event (raid, patrol, blitz etc.)", true)
                         .addOption(OptionType.INTEGER, "time", "In how long the event will begin (minutes)", true)
                         .addOption(OptionType.STRING, "code", "The private server code you are going to use", true)
+                        .addOption(OptionType.STRING, "squad-colour", "The squad colour that people will spawn", true)
+                        .addOption(OptionType.STRING, "spawn-location", "The place the players will spawn at", true)
                         .addOption(OptionType.INTEGER, "atendees", "The amount of atendees required", false)
                         .addOption(OptionType.STRING, "description", "A description of the event", false)
                         .addOption(OptionType.STRING, "co-host", "A list of co-hosts")
+                        .addOption(OptionType.STRING, "notes", "Misc info")
+                        .addOption(OptionType.STRING, "rules", "The rules of the event")
                         .setGuildOnly(true),
                 Commands.slash("setlogchannel", "This command will set the current channel as the log channel")
                         .setGuildOnly(true),

@@ -111,10 +111,10 @@ public class SentinelEventListener extends ListenerAdapter {
 
     private void notfiyAttendee(Message message, String title) {
         EmbedBuilder notifyPlayerMessage = new EmbedBuilder();
+        SentinelEvent event = sentinelEvents.get(message.getId());
         notifyPlayerMessage.setTitle(title);
         notifyPlayerMessage.addField("Event:", message.getJumpUrl(), false);
         notifyPlayerMessage.setFooter(message.getId());
-        SentinelEvent event = sentinelEvents.get(message.getId());
         for (User user : event.getAttendingUsersList()) {
             user.openPrivateChannel().queue(channel -> {
                 channel.sendMessageEmbeds(notifyPlayerMessage.build()).queue();

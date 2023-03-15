@@ -23,6 +23,8 @@ public class SentinelEvent {
     private String psCode;
     private EmbedBuilder eventEmbed;
     private Instant timeToStart;
+    private String squadColour;
+    private String spawnLocation;
 
     private List<User> userList = new ArrayList<>();
     private List<User> attendingUsersList = new ArrayList<>();
@@ -33,6 +35,8 @@ public class SentinelEvent {
         this.ev = ev;
         this.timeToEvent = ev.getOption("time").getAsInt();
         this.psCode = ev.getOption("code").getAsString();
+        this.squadColour = ev.getOption("squad-colour").getAsString();
+        this.spawnLocation = ev.getOption("spawn-location").getAsString();
         getAllNonNullOptions();
         
         initEvent();
@@ -138,6 +142,14 @@ public class SentinelEvent {
 
     public Instant getTimeToStart() {
         return timeToStart;
+    }
+
+    public String getSquadColour() {
+        return squadColour;
+    }
+
+    public String getSpawnLocation() {
+        return spawnLocation;
     }
 
 }

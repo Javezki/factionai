@@ -48,6 +48,8 @@ public class SentinelMessage {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("Hello! The Event Has Started!");
         builder.addField("Code: ", psCode, false);
+        builder.addField("Spawn Location: ", event.getSpawnLocation(), false);
+        builder.addField("Squad Colour: ", event.getSquadColour(), false);
         builder.setFooter("The Event ID: " + embedID);
         for (User user : event.getAttendingUsersList()) {
             user.openPrivateChannel().queue(channel -> {
