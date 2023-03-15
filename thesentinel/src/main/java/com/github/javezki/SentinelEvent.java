@@ -21,6 +21,8 @@ public class SentinelEvent {
     private String embedID;
     private int timeToEvent;
     private String psCode;
+    private EmbedBuilder eventEmbed;
+    private Instant timeToStart;
 
     private List<User> userList = new ArrayList<>();
     private List<User> attendingUsersList = new ArrayList<>();
@@ -49,7 +51,7 @@ public class SentinelEvent {
     }
 
     private boolean isChannel() {
-        if (!(ev.getChannel().getId().equals(Config.getValue(EventCommand.CHANNELID_KEY_VALUE))))
+        if (!(ev.getChannel().getId().equals(Config.getValue(SentinelEventListener.CHANNELID_KEY_VALUE))))
             return false;
         return true;
     }
@@ -73,16 +75,20 @@ public class SentinelEvent {
         embeds.embedEventType(eBuilder);
         embeds.embedTime(eBuilder);
         embeds.embedOptionals(eBuilder);
+
+        eventEmbed = eBuilder;
                 
         Message eventMessage = ev.getChannel().sendMessageEmbeds(eBuilder.build()).complete();
         eventMessage.addReaction(Emoji.fromUnicode("U+2705")).queue();
         embedID = eventMessage.getId();
         ev.reply("Event Successfully Created!").setEphemeral(true).queue();
 
-        JobId id = BackgroundJob.schedule(Instant.now().plusSeconds(timeToEvent*60), () -> {
+        timeToStart = Instant.now().plusSeconds(timeToEvent*60);
+
+        JobId id = BackgroundJob.schedule(timeToStart, () -> {
             new SentinelMessage().onEventStart(psCode, embedID);
         });
-        EventCommand.addJob(this, id);
+        SentinelEventListener.addJob(this, id);
     }
         // for (User user : attendingUsersList) {
         //     user.openPrivateChannel().queue(channel -> {
@@ -124,6 +130,14 @@ public class SentinelEvent {
 
     public void removeUser(User user) {
         attendingUsersList.remove(user);
+    }
+
+    public EmbedBuilder getEventEmbed() {
+        return eventEmbed;
+    }
+
+    public Instant getTimeToStart() {
+        return timeToStart;
     }
 
 }

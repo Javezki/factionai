@@ -1,5 +1,6 @@
 package com.github.javezki;
 
+import java.time.Instant;
 import java.util.HashMap;
 
 import org.jobrunr.jobs.JobId;
@@ -16,7 +17,7 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
-public class EventCommand extends ListenerAdapter {
+public class SentinelEventListener extends ListenerAdapter {
 
     public final static String CHANNELID_KEY_VALUE = "eventChannelID";
     public final static String LOGID_KEY_VALUE = "logChannelID";
@@ -26,41 +27,98 @@ public class EventCommand extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+        String eventID = "";
         switch (event.getName()) {
             case "createevent":
-            if (!permissionCheck(event)) return;
+                if (!permissionCheck(event))
+                    return;
                 SentinelEvent hostEvent = new SentinelEvent(event);
                 String messageID = hostEvent.getEmbedID();
                 sentinelEvents.put(messageID, hostEvent);
                 break;
             case "seteventchannel":
-            if (!permissionCheck(event)) return;
+                if (!permissionCheck(event))
+                    return;
                 setEventChannel(event);
                 break;
             case "setlogchannel":
-            if (!permissionCheck(event)) return;
+                if (!permissionCheck(event))
+                    return;
                 setLogChannel(event);
                 break;
             case "seteventaccess":
-            if (!(event.getMember().hasPermission(Permission.ADMINISTRATOR))) {
-                event.reply("You do not have permission to use this command!").queue();
-                return;
-            }
+                if (!(event.getMember().hasPermission(Permission.ADMINISTRATOR))) {
+                    event.reply("You do not have permission to use this command!").queue();
+                    return;
+                }
                 setEventAccess(event);
                 break;
             case "cancelevent":
-            if (!(permissionCheck(event))) return;
-            String eventID = event.getOption("eventid").getAsString();
-            if (!isValidEvent(eventID, event)) {
-                event.reply("This is not a valid event!").queue();
-                System.out.println("Invalid ID: " + eventID);
-                return;
-            };
-            cancelEvent(getMessageFromSentinel(eventID, event));
-            event.reply("Event has been successfully deleted!").setEphemeral(false).queue();
-            break;
+                if (!(permissionCheck(event)))
+                    return;
+                eventID = event.getOption("eventid").getAsString();
+                if (!isValidEvent(eventID, event)) {
+                    event.reply("This is not a valid event ID!").queue();
+                    System.out.println("Invalid ID: " + eventID);
+                    return;
+                }
+                ;
+                cancelEvent(getMessageFromSentinel(eventID, event));
+                event.reply("Event has been successfully deleted!").setEphemeral(true).queue();
+                break;
+            case "delayevent":
+                if (!(permissionCheck(event)))
+                    return;
+                eventID = event.getOption("eventid").getAsString();
+                if (!isValidEvent(eventID, event)) {
+                    event.reply("This is not a valid event ID!").queue();
+                    System.out.println("Invalid ID: " + eventID);
+                    return;
+                }
+                delayEvent(event);
             default:
                 break;
+        }
+    }
+
+    private void delayEvent(SlashCommandInteractionEvent event) {
+
+        Message message = getMessageFromSentinel(event.getOption("eventid").getAsString(), event);
+        notfiyAttendee(message, "An event was delayed!");
+
+        SentinelEvent sEvent = sentinelEvents.get(message.getId());
+        EmbedBuilder builder = sEvent.getEventEmbed();
+
+        Instant timeToStart = sEvent.getTimeToStart();
+
+        int delayTime = event.getOption("delaytime").getAsInt();
+        timeToStart = timeToStart.plusSeconds(delayTime*60);
+        String timeToStartStr = Long.toString(timeToStart.getEpochSecond());
+        
+        builder.addField("New Time:", "<t:" + timeToStartStr + ":R>\n<t:" + timeToStartStr  +">", false);
+        builder.setFooter("(Delayed)");
+        message.editMessageEmbeds(builder.build()).queue();
+        BackgroundJob.delete(eventJobs.get(sEvent));
+        eventJobs.remove(sEvent);
+        JobId id = BackgroundJob.schedule(Instant.now().plusSeconds(event.getOption("delaytime").getAsInt()*60), () ->{
+            new SentinelMessage().onEventStart(sEvent.getpsCode(), sEvent.getEmbedID());
+        });
+
+        eventJobs.put(sEvent, id);
+
+        event.reply("Event successfully delayed!").setEphemeral(true).queue();
+    }
+
+    private void notfiyAttendee(Message message, String title) {
+        EmbedBuilder notifyPlayerMessage = new EmbedBuilder();
+        notifyPlayerMessage.setTitle(title);
+        notifyPlayerMessage.addField("Event:", message.getJumpUrl(), false);
+        notifyPlayerMessage.setFooter(message.getId());
+        SentinelEvent event = sentinelEvents.get(message.getId());
+        for (User user : event.getAttendingUsersList()) {
+            user.openPrivateChannel().queue(channel -> {
+                channel.sendMessageEmbeds(notifyPlayerMessage.build()).queue();
+            });
         }
     }
 
@@ -71,27 +129,24 @@ public class EventCommand extends ListenerAdapter {
      * @return
      */
     private boolean isValidEvent(String eventID, SlashCommandInteractionEvent ev) {
-        if (eventID == null) return false;
-        if (getMessageFromSentinel(eventID, ev) == null) return false;
-        if (sentinelEvents.get(eventID) == null) return false;
+        if (eventID == null)
+            return false;
+        if (getMessageFromSentinel(eventID, ev) == null)
+            return false;
+        if (sentinelEvents.get(eventID) == null)
+            return false;
         return true;
     }
+
     /**
-     * @apiNote Cancels an event. It will send a message to all participants in said event
-     * @param message The message that was generated from events 
+     * @apiNote Cancels an event. It will send a message to all participants in said
+     *          event
+     * @param message The message that was generated from events
      */
 
     private void cancelEvent(Message message) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle("An event was cancelled!");
-        builder.addField("Event:", message.getJumpUrl(), false);
-        builder.setFooter(message.getId());
+        notfiyAttendee(message, "An Event was Cancelled!");
         SentinelEvent event = sentinelEvents.get(message.getId());
-        for (User user : event.getAttendingUsersList()) {
-            user.openPrivateChannel().queue(channel -> {
-                channel.sendMessageEmbeds(builder.build()).queue();
-            });
-        }
         BackgroundJob.delete(eventJobs.get(event));
         sentinelEvents.remove(message.getId());
         EmbedBuilder editedMessage = new EmbedBuilder();
@@ -103,16 +158,17 @@ public class EventCommand extends ListenerAdapter {
 
     /**
      * 
-     * @param eventID The event ID of the bot. It is actual message ID but in string form
+     * @param eventID The event ID of the bot. It is actual message ID but in string
+     *                form
      * @param ev
      * @return
      */
 
     public Message getMessageFromSentinel(String eventID, SlashCommandInteractionEvent ev) {
         return ev.getGuild()
-        .getTextChannelById(Config.getValue(CHANNELID_KEY_VALUE))
-        .retrieveMessageById(eventID)
-        .complete();
+                .getTextChannelById(Config.getValue(CHANNELID_KEY_VALUE))
+                .retrieveMessageById(eventID)
+                .complete();
     }
 
     private void setEventAccess(SlashCommandInteractionEvent event) {
@@ -175,11 +231,12 @@ public class EventCommand extends ListenerAdapter {
     }
 
     private boolean permissionCheck(SlashCommandInteractionEvent ev) {
-        if (Config.getValue(EventCommand.ROLEID_KEY_VALUE) == null || Config.getValue(EventCommand.ROLEID_KEY_VALUE).equals("")) {
+        if (Config.getValue(SentinelEventListener.ROLEID_KEY_VALUE) == null
+                || Config.getValue(SentinelEventListener.ROLEID_KEY_VALUE).equals("")) {
             ev.reply("Set the role in using /seteventaccess!").queue();
             return false;
         }
-        Role role = Sentinel.jda.getRoleById(Config.getValue(EventCommand.ROLEID_KEY_VALUE));
+        Role role = Sentinel.jda.getRoleById(Config.getValue(SentinelEventListener.ROLEID_KEY_VALUE));
         if (role == null) {
             ev.reply("Set the role in using /seteventaccess!").queue();
             return false;
@@ -198,5 +255,5 @@ public class EventCommand extends ListenerAdapter {
 
     public static void removeJob(SentinelEvent event) {
         eventJobs.remove(event);
-    } 
+    }
 }

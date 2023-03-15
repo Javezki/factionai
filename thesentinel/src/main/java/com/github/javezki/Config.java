@@ -59,7 +59,7 @@ public class Config {
      * @param key The key value of the properties file
      * @return The String value of the key
      */
-    public static String getValue(String key) {
+    protected static String getValue(String key) {
         Properties prop = new Properties();
         FileInputStream input = null;
         try {
@@ -84,9 +84,9 @@ public class Config {
         Properties properties = new Properties();
         try (FileOutputStream out = new FileOutputStream(CONFIG_FILE_NAME)) {
             properties.put(DISCORD_KEY_VALUE, "");
-            properties.put(EventCommand.CHANNELID_KEY_VALUE, "");
-            properties.put(EventCommand.LOGID_KEY_VALUE, "");
-            properties.put(EventCommand.ROLEID_KEY_VALUE, "");
+            properties.put(SentinelEventListener.CHANNELID_KEY_VALUE, "");
+            properties.put(SentinelEventListener.LOGID_KEY_VALUE, "");
+            properties.put(SentinelEventListener.ROLEID_KEY_VALUE, "");
             properties.store(out, null);
         } catch (IOException e) {
             e.printStackTrace();

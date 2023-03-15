@@ -23,7 +23,7 @@ public class Sentinel {
         builder.setActivity(Activity.playing("Testing things for Javezki lol"));
         jda = builder
                 .addEventListeners(new EchoCommand(), 
-                new EventCommand()
+                new SentinelEventListener()
                 )
                 .build();
         initSlashCommands();
@@ -50,6 +50,10 @@ public class Sentinel {
                         .addOption(OptionType.ROLE, "role", "The role that will have access", true),
                 Commands.slash("cancelevent", "Cancels an event")
                         .addOption(OptionType.STRING, "eventid", "The embed ID of the event you created", true)
+                        .setGuildOnly(true),
+                Commands.slash("delayevent", "Delays an event by X amount of minutes")
+                        .addOption(OptionType.STRING,"eventid", "The event ID, it is the message ID of the generated event", true)
+                        .addOption(OptionType.INTEGER, "delaytime", "Delay event by X amount of minutes", true)
                         .setGuildOnly(true)
         ).queue();
     }

@@ -28,8 +28,7 @@ public class SentinelEmbeds {
         int time = ev.getOption("time").getAsInt();
         int curentTime =(int)( System.currentTimeMillis() / 1000L);
         int finalTime = curentTime + (time * 60);
-
-        eBuilder.addField("Event Starting in: ", "<t:" + Integer.toString(finalTime) + ":R>" , true);
+        eBuilder.addField("Event Starting in: ", "<t:" + Integer.toString(finalTime) + ":R>\n<t:" + Integer.toString(finalTime)  +">" , true);
     }
 
     public void embedEventType(EmbedBuilder eBuilder) {
