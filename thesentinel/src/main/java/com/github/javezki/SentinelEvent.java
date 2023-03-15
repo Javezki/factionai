@@ -25,6 +25,7 @@ public class SentinelEvent {
     private Instant timeToStart;
     private String squadColour;
     private String spawnLocation;
+    private String voiceChannel;
 
     private List<User> userList = new ArrayList<>();
     private List<User> attendingUsersList = new ArrayList<>();
@@ -37,6 +38,7 @@ public class SentinelEvent {
         this.psCode = ev.getOption("code").getAsString();
         this.squadColour = ev.getOption("squad-colour").getAsString();
         this.spawnLocation = ev.getOption("spawn-location").getAsString();
+        this.voiceChannel = ev.getOption("voice-channel").getAsString();
         getAllNonNullOptions();
         
         initEvent();
@@ -49,6 +51,9 @@ public class SentinelEvent {
                 nonBlankOptions.add(option);
             }
         }
+        nonBlankOptions.remove(0);
+        nonBlankOptions.remove(0);
+        nonBlankOptions.remove(0);
         nonBlankOptions.remove(0);
         nonBlankOptions.remove(0);
         nonBlankOptions.remove(0);
@@ -150,6 +155,10 @@ public class SentinelEvent {
 
     public String getSpawnLocation() {
         return spawnLocation;
+    }
+
+    public String getVoiceChannel() {
+        return voiceChannel;
     }
 
 }

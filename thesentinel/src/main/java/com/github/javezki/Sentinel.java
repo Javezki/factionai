@@ -41,6 +41,7 @@ public class Sentinel {
                         .addOption(OptionType.STRING, "code", "The private server code you are going to use", true)
                         .addOption(OptionType.STRING, "squad-colour", "The squad colour that people will spawn", true)
                         .addOption(OptionType.STRING, "spawn-location", "The place the players will spawn at", true)
+                        .addOption(OptionType.STRING, "voice-channel", "The voice channel you will be hosting in", true)
                         .addOption(OptionType.INTEGER, "atendees", "The amount of atendees required", false)
                         .addOption(OptionType.STRING, "description", "A description of the event", false)
                         .addOption(OptionType.STRING, "co-host", "A list of co-hosts")
