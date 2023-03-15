@@ -48,7 +48,7 @@ public class SentinelEventListener extends ListenerAdapter {
                 break;
             case "seteventaccess":
                 if (!(event.getMember().hasPermission(Permission.ADMINISTRATOR))) {
-                    event.reply("You do not have permission to use this command!").queue();
+                    event.reply("You do not have permission to use this command!").setEphemeral(true).queue();
                     return;
                 }
                 setEventAccess(event);
@@ -92,17 +92,18 @@ public class SentinelEventListener extends ListenerAdapter {
         Instant timeToStart = sEvent.getTimeToStart();
 
         int delayTime = event.getOption("delaytime").getAsInt();
-        timeToStart = timeToStart.plusSeconds(delayTime*60);
+        timeToStart = timeToStart.plusSeconds(delayTime * 60);
         String timeToStartStr = Long.toString(timeToStart.getEpochSecond());
-        
-        builder.addField("New Time:", "<t:" + timeToStartStr + ":R>\n<t:" + timeToStartStr  +">", false);
+
+        builder.addField("New Time:", "<t:" + timeToStartStr + ":R>\n<t:" + timeToStartStr + ">", false);
         builder.setFooter("(Delayed)");
         message.editMessageEmbeds(builder.build()).queue();
         BackgroundJob.delete(eventJobs.get(sEvent));
         eventJobs.remove(sEvent);
-        JobId id = BackgroundJob.schedule(Instant.now().plusSeconds(event.getOption("delaytime").getAsInt()*60), () ->{
-            new SentinelMessage().onEventStart(sEvent.getpsCode(), sEvent.getEmbedID());
-        });
+        JobId id = BackgroundJob.schedule(Instant.now().plusSeconds(event.getOption("delaytime").getAsInt() * 60),
+                () -> {
+                    new SentinelMessage().onEventStart(sEvent.getpsCode(), sEvent.getEmbedID());
+                });
 
         eventJobs.put(sEvent, id);
 
@@ -116,9 +117,10 @@ public class SentinelEventListener extends ListenerAdapter {
         notifyPlayerMessage.addField("Event:", message.getJumpUrl(), false);
         notifyPlayerMessage.setFooter(message.getId());
         for (User user : event.getAttendingUsersList()) {
-            user.openPrivateChannel().queue(channel -> {
-                channel.sendMessageEmbeds(notifyPlayerMessage.build()).queue();
-            });
+            user.openPrivateChannel().queue(
+                    channel -> {
+                        channel.sendMessageEmbeds(notifyPlayerMessage.build()).queue();
+                    });
         }
     }
 
@@ -190,16 +192,23 @@ public class SentinelEventListener extends ListenerAdapter {
     @Override
     public void onMessageReactionAdd(MessageReactionAddEvent ev) {
         SentinelEvent sentinelEvent = sentinelEvents.get(ev.getMessageId());
+        User user = Sentinel.jda.retrieveUserById(ev.getUserId()).complete();
         if (sentinelEvent == null)
             return;
         if (!(ev.getEmoji().asUnicode().equals(Emoji.fromUnicode("U+2705"))))
             return;
-        if (ev.getUser().isBot())
+        if (user.isBot())
             return;
-        sentinelEvent.addUser(ev.getUser());
-        ev.getUser().openPrivateChannel().queue(channel -> {
-            channel.sendMessage("You have signed up for the event!").queue();
-        });
+
+        user.openPrivateChannel()
+                .flatMap(channel -> channel.sendMessage("You have joined the event!"))
+                .onSuccess(success -> {
+                    sentinelEvent.addUser(user);
+                    System.out.println("User added!");
+                })
+                .onErrorFlatMap(
+                        (error) -> ev.getChannel().sendMessage("OPEN DMS NERD " + user.getAsMention()))
+                .queue();
 
     }
 
@@ -208,13 +217,21 @@ public class SentinelEventListener extends ListenerAdapter {
         SentinelEvent sentinelEvent = sentinelEvents.get(ev.getMessageId());
         if (sentinelEvent == null)
             return;
+        if (ev.getUser().isBot())
+            return;
         if (!(ev.getEmoji().asUnicode().equals(Emoji.fromUnicode("U+2705"))))
             return;
         User user = Sentinel.jda.retrieveUserById(ev.getUserId()).complete();
-        sentinelEvent.removeUser(user);
-        user.openPrivateChannel().queue(channel -> {
-            channel.sendMessage("You have left the event!").queue();
-        });
+        user.openPrivateChannel()
+                .flatMap(channel -> channel.sendMessage("You have left the event!"))
+                .onSuccess((success) -> {
+                    sentinelEvent.removeUser(user);
+                    System.out.println("User successfully removed!");
+                })
+                .onErrorFlatMap(
+                        (error) -> ev.getChannel().sendMessage("OPEN DMS NERD " + user.getAsMention()))
+                .queue();
+
     }
 
     private void setEventChannel(SlashCommandInteractionEvent event) {
@@ -233,7 +250,7 @@ public class SentinelEventListener extends ListenerAdapter {
     private boolean permissionCheck(SlashCommandInteractionEvent ev) {
         if (Config.getValue(SentinelEventListener.ROLEID_KEY_VALUE) == null
                 || Config.getValue(SentinelEventListener.ROLEID_KEY_VALUE).equals("")) {
-            ev.reply("Set the role in using /seteventaccess!").queue();
+            ev.reply("Set the role in using /seteventaccess!").setEphemeral(true).queue();
             return false;
         }
         Role role = Sentinel.jda.getRoleById(Config.getValue(SentinelEventListener.ROLEID_KEY_VALUE));
