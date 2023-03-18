@@ -23,7 +23,7 @@ public class Sentinel {
         builder.setActivity(Activity.playing("With Punch's Balls"));
         jda = builder
                 .addEventListeners(new EchoCommand(), 
-                new SentinelEventListener()
+                new SentinelCommandListener()
                 )
                 .build();
         initSlashCommands();

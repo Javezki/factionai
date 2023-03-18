@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 public class SentinelMessage {
     
     public void onEventStart(String psCode, String embedID) {
-        SentinelEvent event = SentinelEventListener.getEvents().get(embedID);
+        SentinelEvent event = SentinelEvent.getEvent(embedID);
         sendDM(psCode, embedID, event);
         sendToLog(event);
     }
@@ -21,13 +21,13 @@ public class SentinelMessage {
     }
 
     private void sendToLog(SentinelEvent event) {
-        String logID = Config.getValue(SentinelEventListener.LOGID_KEY_VALUE);
-        String eventChannelID = Config.getValue(SentinelEventListener.CHANNELID_KEY_VALUE);
+        String logID = Config.getValue(SentinelEvent.LOGID_KEY_VALUE);
+        String eventChannelID = Config.getValue(SentinelEvent.CHANNELID_KEY_VALUE);
         TextChannel channel = Sentinel.jda.getTextChannelById(logID);
         EmbedBuilder builder = new EmbedBuilder();
         String eventLink = Sentinel.jda
         .getTextChannelById(eventChannelID)
-        .retrieveMessageById(event.getEmbedID())
+        .retrieveMessageById(event.getEventID())
         .complete()
         .getJumpUrl();
 
@@ -65,7 +65,7 @@ public class SentinelMessage {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("Hello! The Event Has Started!");
         builder.addField("Code: ", event.getpsCode(), false);
-        builder.setFooter("The Event ID: " + event.getEmbedID());
+        builder.setFooter("The Event ID: " + event.getEventID());
         for (User user : event.getAttendingUsersList()) {
             user.openPrivateChannel().queue(channel -> {
                 channel.sendMessageEmbeds(builder.build()).queue(

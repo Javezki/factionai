@@ -20,6 +20,6 @@ public class SentinelMain {
         if (Config.getValue(Config.DISCORD_KEY_VALUE).equals("")) 
             Config.setProperty(Config.DISCORD_KEY_VALUE, Config.userInputKey());
 
-        Sentinel sentinel = new Sentinel(Config.getValue(Config.DISCORD_KEY_VALUE));
+        new Sentinel(Config.getValue(Config.DISCORD_KEY_VALUE));
     }
 }

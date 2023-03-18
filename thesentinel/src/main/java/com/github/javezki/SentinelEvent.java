@@ -336,4 +336,8 @@ public class SentinelEvent {
     public String getEventLink() {
         return eventMessage.getJumpUrl();
     }
+
+    public static HashMap<String, SentinelEvent> getCurrentEvents() {
+        return currentEvents;
+    }
 }
