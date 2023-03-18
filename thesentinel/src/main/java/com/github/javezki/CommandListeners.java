@@ -1,5 +1,6 @@
 package com.github.javezki;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
@@ -9,7 +10,7 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
-public class SentinelCommandListener extends ListenerAdapter {
+public class CommandListeners extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent ev) {
@@ -53,6 +54,7 @@ public class SentinelCommandListener extends ListenerAdapter {
                 event = SentinelEvent.getEvent(eventID);
                 event.cancelEvent();
                 ev.reply("Event has been successfully deleted!").setEphemeral(true).queue();
+                System.out.println("Event successfully deleted by: " + ev.getUser().getAsMention() + "\nID: " + event.getEventID());
                 break;
             case "delayevent":
                 if (!(permissionCheck(ev)))
@@ -66,6 +68,13 @@ public class SentinelCommandListener extends ListenerAdapter {
                 event = SentinelEvent.getEvent(eventID);
                 int delayTime = ev.getOption("delaytime").getAsInt();
                 event.delayEvent(delayTime);
+                ev.reply("Event successfully delayed!").setEphemeral(true).queue();
+                System.out.println("Event successfully delayed by: " + ev.getUser().getAsTag() + "\nID: " + event.getEventID());
+            case "setroleping": 
+                if (!(ev.getMember().hasPermission(Permission.ADMINISTRATOR))) return;
+                BotConfig.setRolePing(ev.getOption("role").getAsRole());
+                ev.reply("Ping role has been successfully set!").setEphemeral(true).queue();
+                System.out.println("Ping role has been set to: " + ev.getOption("role").getAsRole().getId());
             default:
                 break;
         }
@@ -96,12 +105,17 @@ public class SentinelCommandListener extends ListenerAdapter {
             return;
         if (user.isBot())
             return;
+        if (sentinelEvent.isStarted())
+            return;
 
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle("Joined an event!");
+        builder.addField("Event:", sentinelEvent.getEventLink(), false);
         user.openPrivateChannel()
-                .flatMap(channel -> channel.sendMessage("You have joined the event!"))
+                .flatMap(channel -> channel.sendMessageEmbeds(builder.build()))
                 .onSuccess(success -> {
                     sentinelEvent.addUser(user);
-                    System.out.println("User, " + user.getAsTag() + "added to event: " + sentinelEvent.getEventID());
+                    System.out.println("User, " + user.getAsTag() + " added to event: " + sentinelEvent.getEventID());
                 })
                 .onErrorFlatMap(
                         (error) -> ev.getChannel().sendMessage("OPEN DMS NERD " + user.getAsMention()))
@@ -118,12 +132,17 @@ public class SentinelCommandListener extends ListenerAdapter {
             return;
         if (!(ev.getEmoji().asUnicode().equals(Emoji.fromUnicode("U+2705"))))
             return;
+        if (sentinelEvent.isStarted())
+            return;
         User user = Sentinel.jda.retrieveUserById(ev.getUserId()).complete();
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle("Withdrawn from event");
+        builder.addField("Event:", sentinelEvent.getEventLink(), false);
         user.openPrivateChannel()
-                .flatMap(channel -> channel.sendMessage("You have left the event!"))
+                .flatMap(channel -> channel.sendMessageEmbeds(builder.build()))
                 .onSuccess((success) -> {
                     sentinelEvent.removeUser(user);
-                    System.out.println("User: " + user.getAsTag() + " removed from event: " + sentinelEvent.getEventID());
+                    System.out.println("User, " + user.getAsTag() + " removed from event: " + sentinelEvent.getEventID());
                 })
                 .onErrorFlatMap(
                         (error) -> ev.getChannel().sendMessage("OPEN DMS NERD " + user.getAsMention()))

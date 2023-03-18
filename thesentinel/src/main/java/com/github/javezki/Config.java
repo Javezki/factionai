@@ -10,11 +10,9 @@ import java.util.Scanner;
 public class Config {
 
     public static String CONFIG_FILE_NAME = "discord.properties";
-    public static String DISCORD_KEY_VALUE = "discordKey";
+    protected static String DISCORD_KEY_VALUE = "discordKey";
 
-    public Config() {
-
-    }
+    private Config(){}
 
     /**
      * @apiNote Sets a value to an existing key in discord.properties

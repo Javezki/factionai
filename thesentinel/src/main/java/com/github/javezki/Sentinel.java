@@ -23,7 +23,8 @@ public class Sentinel {
         builder.setActivity(Activity.playing("With Punch's Balls"));
         jda = builder
                 .addEventListeners(new EchoCommand(), 
-                new SentinelCommandListener()
+                new CommandListeners(),
+                new CurrentEventListener()
                 )
                 .build();
         initSlashCommands();
@@ -53,6 +54,9 @@ public class Sentinel {
                 Commands.slash("seteventaccess", "This command will set the role that will have access to the permission")
                         .setGuildOnly(true)
                         .addOption(OptionType.ROLE, "role", "The role that will have access", true),
+                Commands.slash("setroleping", "This command will set the role that will be pinged on event start")
+                        .addOption(OptionType.ROLE, "role", "The role that will be pinged", true)
+                        .setGuildOnly(true),
                 Commands.slash("cancelevent", "Cancels an event")
                         .addOption(OptionType.STRING, "eventid", "The embed ID of the event you created", true)
                         .setGuildOnly(true),

@@ -10,8 +10,9 @@ import org.jobrunr.scheduling.BackgroundJob;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -30,15 +31,20 @@ public class SentinelEvent {
     private Message eventMessage;
     private String type;
     private User host;
+    private boolean started;
+    private MessageChannel channel;
+    private Role roleToPing;
 
     public final static String CHANNELID_KEY_VALUE = "eventChannelID";
     public final static String LOGID_KEY_VALUE = "logChannelID";
     public final static String ROLEID_KEY_VALUE = "eventAccessID";
+    public static final String PINGID_KEY_VALUE = "pingRoleID";
+    private static final long LATE_BUFFER_TIME = 1200;
 
     private List<User> userList = new ArrayList<>();
     private List<User> attendingUsersList = new ArrayList<>();
-    private static HashMap<String, SentinelEvent> futureEvents = new HashMap<>();
-    private static HashMap<String, SentinelEvent> currentEvents = new HashMap<>();
+    private List<User> lateUsersList = new ArrayList<>();
+    private static HashMap<String, SentinelEvent> events = new HashMap<>();
     public static HashMap<SentinelEvent, JobId> eventJobs = new HashMap<>();
 
 
@@ -51,24 +57,41 @@ public class SentinelEvent {
         this.voiceChannel = ev.getOption("voice-channel").getAsString();
         this.host = ev.getUser();
         this.type = ev.getOption("type").getAsString();
+        this.channel = ev.getChannel();
+        this.roleToPing = Sentinel.jda.getRoleById(Config.getValue(PINGID_KEY_VALUE));
+        started = false;
+
+        System.out.println("Channel: " + channel.getAsMention());
+        
         getAllNonNullOptions(ev.getOptions());
         
         //Sends the embed to specified channel
 
         sendEmbedOnCreation(ev.getChannel().asTextChannel());
 
+        if (!(roleToPing == null)) pingRole();
+
         createJob();
+
+        createLateJob();    
 
         ev.reply("Event Successfully Created!").setEphemeral(true).queue();
 
-        futureEvents.put(eventID, this);
+        events.put(eventID, this);
 
         System.out.println("Successfully created a new event! Event ID: " + eventID);
 
     }
 
-    public void sendEmbedOnCreation(TextChannel channel) {
-        if (!isChannel(channel)) return;
+    /**
+     * @apiNote Pings role that is set in config
+     */
+
+    private void pingRole() {
+        channel.sendMessage(roleToPing.getAsMention()).queue();
+    }
+
+    public void sendEmbedOnCreation(MessageChannel channel) {
 
         EmbedBuilder eBuilder = new EmbedBuilder();
 
@@ -101,6 +124,7 @@ public class SentinelEvent {
 
         eventEmbed = eBuilder;
 
+        System.out.println("Event embed successfully created!: ID:" + eventID);
     }
 
 
@@ -108,9 +132,17 @@ public class SentinelEvent {
         timeToStart = Instant.now().plusSeconds(timeToEvent*60);
 
         JobId id = BackgroundJob.schedule(timeToStart, () -> {
-            new SentinelMessage().onEventStart(psCode, eventID);
+            new SentinelJobs().onFutureStart(eventID);
         });
         addJob(this, id);
+        System.out.println("Job initialized! ID:" + eventID);
+    }
+
+    private void createLateJob() {
+        BackgroundJob.schedule(timeToStart.plusSeconds(LATE_BUFFER_TIME), () -> {
+            new SentinelJobs().onLate(eventID);
+        });
+        System.out.println("Late job initialized! ID: " + eventID);
     }
 
     /**
@@ -132,15 +164,7 @@ public class SentinelEvent {
         nonBlankOptions.remove(0);
     }
 
-    private boolean isChannel(TextChannel channel) {
-        if (!(channel.getId().equals(Config.getValue(CHANNELID_KEY_VALUE))))
-            return false;
-        return true;
-    }
-
     public void delayEvent(int delayTime) {
-
-        notfiyAttendee("An event was delayed!");
 
         EmbedBuilder builder = getEventEmbed();
 
@@ -156,15 +180,17 @@ public class SentinelEvent {
         BackgroundJob.delete(eventJobs.get(this));
         eventJobs.remove(this);
 
-        //Starts new job with delay
+        //Starts a future job with delay
         JobId id = BackgroundJob.schedule(Instant.now().plusSeconds(delayTime * 60),
                 () -> {
-                    new SentinelMessage().onEventStart(psCode, eventID);
+                    new SentinelJobs().onFutureStart(eventID);
                 });
-
+        
         //Re-adds job into job list
 
         eventJobs.put(this, id);
+
+        notfiyAttendee("An event was delayed!");
 
     }
     
@@ -184,7 +210,7 @@ public class SentinelEvent {
 
         BackgroundJob.delete(eventJobs.get(this));
         eventJobs.remove(this);
-        futureEvents.remove(eventID);
+        events.remove(eventID);
 
         //Sets current event message as cancelled
 
@@ -193,6 +219,8 @@ public class SentinelEvent {
         eventMessage.editMessageEmbeds(editedMessage.build()).queue();
         eventMessage.clearReactions();
         System.out.println(eventID + " has been deleted!");
+
+        deleteEvent();
     }
 
     /**
@@ -272,7 +300,7 @@ public class SentinelEvent {
      * event ID (the message ID)
      */
     public static HashMap<String, SentinelEvent> getAllEvents() {
-        return futureEvents;
+        return events;
     }
 
     /**
@@ -295,12 +323,20 @@ public class SentinelEvent {
 
     /**
      * 
+     * @return The channel the event was created in
+     */
+    public MessageChannel getChannel() {
+        return channel;
+    }
+
+    /**
+     * 
      * @param eventID The eventID corresponding to the event
      * @return The event initalized with that eventID
      */
 
     public static SentinelEvent getEvent(String eventID) {
-        return futureEvents.get(eventID);
+        return events.get(eventID);
     }
 
     /**
@@ -329,6 +365,10 @@ public class SentinelEvent {
         eventJobs.remove(event);
     }
 
+    public void deleteEvent() {
+        events.remove(eventID);
+    }
+
     /**
      * 
      * @return The discord URL associated with the event
@@ -337,7 +377,31 @@ public class SentinelEvent {
         return eventMessage.getJumpUrl();
     }
 
-    public static HashMap<String, SentinelEvent> getCurrentEvents() {
-        return currentEvents;
+    /**
+     * @apiNote True means that the event has started, false means it has not
+     * @param status A true or false value of whether it has started or not
+     */
+
+    public void setStarted (boolean status) {
+        started = status;
+    }
+
+    public boolean isStarted() {
+        return started;
+    }
+
+    public void addLateUser(User user) {
+        lateUsersList.add(user);
+    }
+
+    public List<User> getLateList() {
+        return lateUsersList;
+    }
+    /**
+     * 
+     * @return returns the role to ping that is currently in cache
+     */
+    public Role getRoleToPing() {
+        return roleToPing;
     }
 }

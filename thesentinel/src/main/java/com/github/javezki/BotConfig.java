@@ -33,4 +33,8 @@ public class BotConfig {
     public static void setEventChannel(MessageChannel channel) {
         Config.setProperty(SentinelEvent.CHANNELID_KEY_VALUE, channel.getId());
     }
+
+    public static void setRolePing(Role role) {
+        Config.setProperty(SentinelEvent.PINGID_KEY_VALUE, role.getId());
+    }
 }
