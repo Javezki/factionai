@@ -82,9 +82,9 @@ public class Config {
         Properties properties = new Properties();
         try (FileOutputStream out = new FileOutputStream(CONFIG_FILE_NAME)) {
             properties.put(DISCORD_KEY_VALUE, "");
-            properties.put(SentinelEvent.CHANNELID_KEY_VALUE, "");
-            properties.put(SentinelEvent.LOGID_KEY_VALUE, "");
-            properties.put(SentinelEvent.ROLEID_KEY_VALUE, "");
+            properties.put(FactionEvent.CHANNELID_KEY_VALUE, "");
+            properties.put(FactionEvent.LOGID_KEY_VALUE, "");
+            properties.put(FactionEvent.ROLEID_KEY_VALUE, "");
             properties.store(out, null);
         } catch (IOException e) {
             e.printStackTrace();

@@ -15,7 +15,7 @@ public class BotConfig {
      */
 
     public static void setEventAccess(Role role) {
-        Config.setProperty(SentinelEvent.ROLEID_KEY_VALUE, role.getId());
+        Config.setProperty(FactionEvent.ROLEID_KEY_VALUE, role.getId());
     }
 
     /**
@@ -23,7 +23,7 @@ public class BotConfig {
      * @param event Sets the channel used as the main channel for logging
      */
     public static void setLogChannel(MessageChannel channel) {
-        Config.setProperty(SentinelEvent.LOGID_KEY_VALUE, channel.getId());
+        Config.setProperty(FactionEvent.LOGID_KEY_VALUE, channel.getId());
     }
     
     /**
@@ -31,10 +31,10 @@ public class BotConfig {
      * @param event Sets the channel where command was used as the only channel that can be used for events
      */
     public static void setEventChannel(MessageChannel channel) {
-        Config.setProperty(SentinelEvent.CHANNELID_KEY_VALUE, channel.getId());
+        Config.setProperty(FactionEvent.CHANNELID_KEY_VALUE, channel.getId());
     }
 
     public static void setRolePing(Role role) {
-        Config.setProperty(SentinelEvent.PINGID_KEY_VALUE, role.getId());
+        Config.setProperty(FactionEvent.PINGID_KEY_VALUE, role.getId());
     }
 }

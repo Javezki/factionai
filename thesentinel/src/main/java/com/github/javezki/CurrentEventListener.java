@@ -10,8 +10,8 @@ public class CurrentEventListener extends ListenerAdapter {
 
     @Override
     public void onMessageReactionAdd(MessageReactionAddEvent ev) {
-        SentinelEvent event = SentinelEvent.getEvent(ev.getMessageId());
-        User user = Sentinel.jda.retrieveUserById(ev.getUserId()).complete();
+        FactionEvent event = FactionEvent.getEvent(ev.getMessageId());
+        User user = Faction.jda.retrieveUserById(ev.getUserId()).complete();
         if (event == null)
             return;
         if (!(ev.getEmoji().asUnicode().equals(Emoji.fromUnicode("U+2705"))))

@@ -15,12 +15,12 @@ public class CommandListeners extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent ev) {
         String eventID = "";
-        SentinelEvent event = null;
+        FactionEvent event = null;
         switch (ev.getName()) {
             case "createevent":
                 if (!permissionCheck(ev))
                     return;
-                new SentinelEvent(ev);
+                new FactionEvent(ev);
                 break;
             case "seteventchannel": {
                 if (!permissionCheck(ev))
@@ -51,7 +51,7 @@ public class CommandListeners extends ListenerAdapter {
                     System.out.println("Invalid ID: " + eventID);
                     return;
                 };
-                event = SentinelEvent.getEvent(eventID);
+                event = FactionEvent.getEvent(eventID);
                 event.cancelEvent();
                 ev.reply("Event has been successfully deleted!").setEphemeral(true).queue();
                 System.out.println("Event successfully deleted by: " + ev.getUser().getAsMention() + "\nID: " + event.getEventID());
@@ -65,7 +65,7 @@ public class CommandListeners extends ListenerAdapter {
                     System.out.println("Invalid ID: " + eventID);
                     return;
                 }
-                event = SentinelEvent.getEvent(eventID);
+                event = FactionEvent.getEvent(eventID);
                 int delayTime = ev.getOption("delaytime").getAsInt();
                 event.delayEvent(delayTime);
                 ev.reply("Event successfully delayed!").setEphemeral(true).queue();
@@ -89,7 +89,7 @@ public class CommandListeners extends ListenerAdapter {
     private boolean isValidEvent(String eventID) {
         if (eventID == null)
             return false;
-        SentinelEvent event = SentinelEvent.getEvent(eventID);
+        FactionEvent event = FactionEvent.getEvent(eventID);
         if (event == null)
             return false;
         return true;
@@ -97,8 +97,8 @@ public class CommandListeners extends ListenerAdapter {
     
     @Override
     public void onMessageReactionAdd(MessageReactionAddEvent ev) {
-        SentinelEvent sentinelEvent = SentinelEvent.getEvent(ev.getMessageId());
-        User user = Sentinel.jda.retrieveUserById(ev.getUserId()).complete();
+        FactionEvent sentinelEvent = FactionEvent.getEvent(ev.getMessageId());
+        User user = Faction.jda.retrieveUserById(ev.getUserId()).complete();
         if (sentinelEvent == null)
             return;
         if (!(ev.getEmoji().asUnicode().equals(Emoji.fromUnicode("U+2705"))))
@@ -125,7 +125,7 @@ public class CommandListeners extends ListenerAdapter {
 
     @Override
     public void onMessageReactionRemove(MessageReactionRemoveEvent ev) {
-        SentinelEvent sentinelEvent = SentinelEvent.getEvent(ev.getMessageId());
+        FactionEvent sentinelEvent = FactionEvent.getEvent(ev.getMessageId());
         if (sentinelEvent == null)
             return;
         if (ev.getUser().isBot())
@@ -134,7 +134,7 @@ public class CommandListeners extends ListenerAdapter {
             return;
         if (sentinelEvent.isStarted())
             return;
-        User user = Sentinel.jda.retrieveUserById(ev.getUserId()).complete();
+        User user = Faction.jda.retrieveUserById(ev.getUserId()).complete();
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("Withdrawn from event");
         builder.addField("Event:", sentinelEvent.getEventLink(), false);
@@ -152,12 +152,12 @@ public class CommandListeners extends ListenerAdapter {
 
 
     private boolean permissionCheck(SlashCommandInteractionEvent ev) {
-        if (Config.getValue(SentinelEvent.ROLEID_KEY_VALUE) == null
-                || Config.getValue(SentinelEvent.ROLEID_KEY_VALUE).equals("")) {
+        if (Config.getValue(FactionEvent.ROLEID_KEY_VALUE) == null
+                || Config.getValue(FactionEvent.ROLEID_KEY_VALUE).equals("")) {
             ev.reply("Set the role in using /seteventaccess!").setEphemeral(true).queue();
             return false;
         }
-        Role role = Sentinel.jda.getRoleById(Config.getValue(SentinelEvent.ROLEID_KEY_VALUE));
+        Role role = Faction.jda.getRoleById(Config.getValue(FactionEvent.ROLEID_KEY_VALUE));
         if (role == null) {
             ev.reply("Set the role in using /seteventaccess!").queue();
             return false;
