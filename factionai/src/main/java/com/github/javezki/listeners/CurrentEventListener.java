@@ -1,4 +1,7 @@
-package com.github.javezki;
+package com.github.javezki.listeners;
+
+import com.github.javezki.faction.Faction;
+import com.github.javezki.faction.FactionEvent;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;

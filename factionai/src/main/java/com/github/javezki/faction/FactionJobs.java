@@ -1,7 +1,9 @@
-package com.github.javezki;
+package com.github.javezki.faction;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import com.github.javezki.Config;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;

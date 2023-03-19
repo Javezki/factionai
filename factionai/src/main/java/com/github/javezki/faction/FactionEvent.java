@@ -1,4 +1,4 @@
-package com.github.javezki;
+package com.github.javezki.faction;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.jobrunr.jobs.JobId;
 import org.jobrunr.scheduling.BackgroundJob;
+
+import com.github.javezki.Config;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;

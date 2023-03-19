@@ -1,4 +1,4 @@
-package com.github.javezki;
+package com.github.javezki.faction;
 
 import java.util.List;
 
