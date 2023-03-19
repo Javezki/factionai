@@ -7,7 +7,7 @@ import org.jobrunr.storage.InMemoryStorageProvider;
  * Hello world!
  *
  */
-public class FacionMain {
+public class FactionMain {
 
 
     public static void main(String[] args) {
