@@ -1,4 +1,7 @@
-package com.github.javezki;
+package com.github.javezki.Listeners;
+
+import com.github.javezki.Sentinel;
+import com.github.javezki.SentinelEvent;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;

@@ -57,7 +57,7 @@ public class Config {
      * @param key The key value of the properties file
      * @return The String value of the key
      */
-    protected static String getValue(String key) {
+    public static String getValue(String key) {
         Properties prop = new Properties();
         FileInputStream input = null;
         try {

@@ -24,7 +24,7 @@ public class SentinelEvent {
     private int timeToEvent;
     private String psCode;
     private EmbedBuilder eventEmbed;
-    private Instant timeToStart;
+    private Instant unixTimeToStart;
     private String squadColour;
     private String spawnLocation;
     private String voiceChannel;
@@ -129,9 +129,9 @@ public class SentinelEvent {
 
 
     private void createJob() {
-        timeToStart = Instant.now().plusSeconds(timeToEvent*60);
+        unixTimeToStart = Instant.now().plusSeconds(timeToEvent*60);
 
-        JobId id = BackgroundJob.schedule(timeToStart, () -> {
+        JobId id = BackgroundJob.schedule(unixTimeToStart, () -> {
             new SentinelJobs().onFutureStart(eventID);
         });
         addJob(this, id);
@@ -139,7 +139,7 @@ public class SentinelEvent {
     }
 
     private void createLateJob() {
-        BackgroundJob.schedule(timeToStart.plusSeconds(LATE_BUFFER_TIME), () -> {
+        BackgroundJob.schedule(unixTimeToStart.plusSeconds(LATE_BUFFER_TIME), () -> {
             new SentinelJobs().onLate(eventID);
         });
         System.out.println("Late job initialized! ID: " + eventID);
@@ -168,8 +168,8 @@ public class SentinelEvent {
 
         EmbedBuilder builder = getEventEmbed();
 
-        timeToStart = timeToStart.plusSeconds(delayTime * 60);
-        String timeToStartStr = Long.toString(timeToStart.getEpochSecond());
+        unixTimeToStart = unixTimeToStart.plusSeconds(delayTime * 60);
+        String timeToStartStr = Long.toString(unixTimeToStart.getEpochSecond());
 
         builder.addField("New Time:", "<t:" + timeToStartStr + ":R>\n<t:" + timeToStartStr + ">", false);
         builder.setFooter("(Delayed)");
@@ -278,8 +278,8 @@ public class SentinelEvent {
         return eventEmbed;
     }
 
-    public Instant getTimeToStart() {
-        return timeToStart;
+    public Instant getUnixTimeToStart() {
+        return unixTimeToStart;
     }
 
     public String getSquadColour() {
