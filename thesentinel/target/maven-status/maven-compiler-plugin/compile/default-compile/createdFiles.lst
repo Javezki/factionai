@@ -1,7 +1,5 @@
 com\github\javezki\Sentinel.class
-com\github\javezki\SentinelEventListener.class
 com\github\javezki\SentinelEmbeds.class
-com\github\javezki\SentinelMessage.class
 com\github\javezki\SentinelLog.class
 com\github\javezki\Config.class
 com\github\javezki\EchoCommand.class
