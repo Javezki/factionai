@@ -3,11 +3,13 @@ package com.github.javezki;
 import org.jobrunr.configuration.JobRunr;
 import org.jobrunr.storage.InMemoryStorageProvider;
 
+import com.github.javezki.faction.Faction;
+
 /**
  * Hello world!
  *
  */
-public class FacionMain {
+public class FactionMain {
 
 
     public static void main(String[] args) {

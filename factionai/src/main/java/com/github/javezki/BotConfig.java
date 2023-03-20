@@ -1,5 +1,7 @@
 package com.github.javezki;
 
+import com.github.javezki.faction.FactionEvent;
+
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 

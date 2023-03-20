@@ -1,4 +1,9 @@
-package com.github.javezki;
+package com.github.javezki.faction;
+
+import com.github.javezki.listeners.CommandListeners;
+import com.github.javezki.listeners.CurrentEventListener;
+import com.github.javezki.listeners.EchoCommand;
+import com.github.javezki.listeners.FutureEventListeners;
 
 import com.github.javezki.listeners.CommandListeners;
 import com.github.javezki.listeners.CurrentEventListener;
@@ -27,7 +32,8 @@ public class Faction {
         jda = builder
                 .addEventListeners(new EchoCommand(), 
                 new CommandListeners(),
-                new CurrentEventListener()
+                new CurrentEventListener(),
+                new FutureEventListeners()
                 )
                 .build();
         initSlashCommands();
