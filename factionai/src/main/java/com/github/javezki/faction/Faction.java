@@ -5,8 +5,6 @@ import com.github.javezki.listeners.CurrentEventListener;
 import com.github.javezki.listeners.EchoCommand;
 import com.github.javezki.listeners.FutureEventListeners;
 
-import com.github.javezki.listeners.CommandListeners;
-import com.github.javezki.listeners.CurrentEventListener;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
