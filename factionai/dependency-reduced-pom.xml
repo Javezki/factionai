@@ -60,7 +60,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>com.github.javezki.SentinelMain</mainClass>
+                  <mainClass>com.github.javezki.FactionMain</mainClass>
                 </transformer>
               </transformers>
             </configuration>
