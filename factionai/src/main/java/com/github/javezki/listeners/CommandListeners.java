@@ -42,6 +42,7 @@ public class CommandListeners extends ListenerAdapter {
                     return;
                 }
                 BotConfig.setEventAccess(ev.getOption("role").getAsRole());
+                ev.reply("The role has successfully been set!").setEphemeral(true).queue();
                 break;
             case "cancelevent":
                 if (!(permissionCheck(ev)))
