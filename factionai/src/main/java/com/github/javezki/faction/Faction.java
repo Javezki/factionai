@@ -16,6 +16,8 @@ public class Faction {
 
     public static JDA jda;
 
+    public static long guildID = 1086831746106007703L;
+
     public Faction(String botKey) {
         initBot(botKey);
     }
