@@ -310,6 +310,25 @@ public class SQLConfig {
         return loadoutList;
     }
 
+    public static List<Loadout> getAllInventory(long ID) {
+        String query = "SELECT * FROM " + USER_INVENTORY_TABLE + " WHERE user_id = ?";
+        List<Loadout> loadoutList = new ArrayList<>();
+        try (PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setLong(1, ID);
+            try (ResultSet set = statement.executeQuery()) {
+                while (set.next()) {
+                    loadoutList.add(new Loadout(
+                            Primary.valueOf(set.getString(PRIMARY_WEAPON_COLUMN)),
+                            Secondary.valueOf(set.getString(SECONDARY_WEAPON_COLUMN)),
+                            Melee.valueOf(set.getString(MELEE_COLUMN))));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return loadoutList;
+    }
+
     public static Role getRank(long ID) {
         String query = "SELECT Ranks FROM " + USER_INFO_TABLE + " WHERE user_id = ?";
         Role role = Faction.jda.getRoleById(FactionUser.DEFAULT_RANK_ID);
