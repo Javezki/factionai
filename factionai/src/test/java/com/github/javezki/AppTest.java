@@ -60,6 +60,17 @@ public class AppTest
         assertEquals(Melee.DOWNRANGE, loadout.getMelee());
     }
 
+    @Test
+    public void userBalanceTests() {
+        SQLConfig.setBalance(id, 500);
+        assertEquals(500, SQLConfig.getUserBalance(id), 0);
+    }
+
+    @Test
+    public void userRankTests() {
+        SQLConfig.setRank(id, 123456);
+        assertEquals(123456, SQLConfig.getRankLong(id));
+    }
 
 }
 
