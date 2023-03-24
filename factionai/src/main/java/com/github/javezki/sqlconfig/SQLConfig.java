@@ -219,7 +219,6 @@ public class SQLConfig {
             statement.setInt(5, loadoutNumber);
             statement.execute();
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return true;
@@ -245,7 +244,6 @@ public class SQLConfig {
             statement.setInt(5, inventoryNumber);
             statement.execute();
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return true;
