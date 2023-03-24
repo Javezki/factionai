@@ -9,7 +9,6 @@ import org.junit.Test;
 import com.github.javezki.economy.Melee;
 import com.github.javezki.economy.Primary;
 import com.github.javezki.economy.Secondary;
-import com.github.javezki.faction.factionuser.FactionUser;
 import com.github.javezki.faction.factionuser.Loadout;
 import com.github.javezki.sqlconfig.SQLConfig;
 
