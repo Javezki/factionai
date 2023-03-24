@@ -7,13 +7,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.github.javezki.economy.Melee;
 import com.github.javezki.economy.Primary;
 import com.github.javezki.economy.Secondary;
+import com.github.javezki.faction.Faction;
 import com.github.javezki.faction.factionuser.FactionUser;
 import com.github.javezki.faction.factionuser.Loadout;
-import com.google.gson.Gson;
+
+import net.dv8tion.jda.api.entities.Role;
 
 public class SQLConfig {
 
@@ -110,22 +114,27 @@ public class SQLConfig {
             PreparedStatement statement = conn.prepareStatement(sql);
             statement.setLong(1, ID);
             statement.setInt(2, 50);
-            statement.setLong(3, FactionUser.defaultRankID);
+            statement.setLong(3, FactionUser.DEFAULT_RANK_ID);
             statement.execute();
             initLoadout(ID);
             initInv(ID);
             System.out.println("Successfully created ID!: " + Long.toString(ID));
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
     private static void initInv(long ID) {
-        String initInv = "INSERT INTO " + USER_INVENTORY_TABLE + " (user_id, number, inventory) " +
-                " VALUES (?, ?, TRUE)";
+        String initInv = "INSERT INTO " + USER_INVENTORY_TABLE + " (user_id, number, " +
+                PRIMARY_WEAPON_COLUMN + ", " +
+                SECONDARY_WEAPON_COLUMN + ", " +
+                MELEE_COLUMN + ") " +
+                " VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement statement = conn.prepareStatement(initInv)) {
             statement.setLong(1, ID);
+            statement.setString(3, Primary.NONE.name());
+            statement.setString(4, Secondary.NONE.name());
+            statement.setString(5, Melee.NONE.name());
             for (int i = 0; i < FactionUser.INVENTORY_SIZE; i++) {
                 statement.setInt(2, i + 1);
                 statement.execute();
@@ -136,11 +145,17 @@ public class SQLConfig {
     }
 
     private static void initLoadout(long ID) {
-        String initLoadout = "INSERT INTO " + USER_LOADOUT_TABLE + " (user_id, number) " +
-                " VALUES (?, ?) ";
+        String initLoadout = "INSERT INTO " + USER_LOADOUT_TABLE + " (user_id, number, " +
+        PRIMARY_WEAPON_COLUMN + ", " +
+        SECONDARY_WEAPON_COLUMN + ", " +
+        MELEE_COLUMN + ") " +
+        " VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement statement = conn.prepareStatement(initLoadout)) {
             ;
             statement.setLong(1, ID);
+            statement.setString(3, Primary.NONE.name());
+            statement.setString(4, Secondary.NONE.name());
+            statement.setString(5, Melee.NONE.name());
             for (int i = 0; i < FactionUser.LOADOUT_SIZE; i++) {
                 statement.setInt(2, i + 1);
                 statement.execute();
@@ -191,9 +206,12 @@ public class SQLConfig {
         // (?, ?, ?, ?, ?, true)";
         try (PreparedStatement statement = conn.prepareStatement(query)) {
 
-            if (loadout.getPrimary() == null) loadout.setPrimary(Primary.NONE);
-            if (loadout.getSecondary() == null) loadout.setSecondary(Secondary.NONE);
-            if (loadout.getMelee() == null) loadout.setMelee(Melee.NONE);
+            if (loadout.getPrimary() == null)
+                loadout.setPrimary(Primary.NONE);
+            if (loadout.getSecondary() == null)
+                loadout.setSecondary(Secondary.NONE);
+            if (loadout.getMelee() == null)
+                loadout.setMelee(Melee.NONE);
             statement.setString(1, loadout.getPrimary().name());
             statement.setString(2, loadout.getSecondary().name());
             statement.setString(3, loadout.getMelee().name());
@@ -214,9 +232,12 @@ public class SQLConfig {
                 MELEE_COLUMN + " = ? " +
                 "WHERE user_id = ? AND number = ?";
         try (PreparedStatement statement = conn.prepareStatement(query)) {
-            if (loadout.getPrimary() == null) loadout.setPrimary(Primary.NONE);
-            if (loadout.getSecondary() == null) loadout.setSecondary(Secondary.NONE);
-            if (loadout.getMelee() == null) loadout.setMelee(Melee.NONE);
+            if (loadout.getPrimary() == null)
+                loadout.setPrimary(Primary.NONE);
+            if (loadout.getSecondary() == null)
+                loadout.setSecondary(Secondary.NONE);
+            if (loadout.getMelee() == null)
+                loadout.setMelee(Melee.NONE);
             statement.setString(1, loadout.getPrimary().name());
             statement.setString(2, loadout.getSecondary().name());
             statement.setString(3, loadout.getMelee().name());
@@ -268,6 +289,55 @@ public class SQLConfig {
         }
 
         return new Loadout(primary, secondary, melee);
+    }
+
+    public static List<Loadout> getAllLoadouts(long ID) {
+        String query = "SELECT * FROM " + USER_LOADOUT_TABLE + " WHERE user_id = ?";
+        List<Loadout> loadoutList = new ArrayList<>();
+        try (PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setLong(1, ID);
+            try (ResultSet set = statement.executeQuery()) {
+                while (set.next()) {
+                    loadoutList.add(new Loadout(
+                            Primary.valueOf(set.getString(PRIMARY_WEAPON_COLUMN)),
+                            Secondary.valueOf(set.getString(SECONDARY_WEAPON_COLUMN)),
+                            Melee.valueOf(set.getString(MELEE_COLUMN))));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return loadoutList;
+    }
+
+    public static Role getRank(long ID) {
+        String query = "SELECT Ranks FROM " + USER_INFO_TABLE + " WHERE user_id = ?";
+        Role role = Faction.jda.getRoleById(FactionUser.DEFAULT_RANK_ID);
+        try (PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setLong(1, ID);
+            try (ResultSet set = statement.executeQuery()) {
+                set.next();
+                role = Faction.jda.getRoleById(set.getLong("Ranks"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return role;
+    }
+
+    public static long getRankLong(long ID) {
+        String query = "SELECT Ranks FROM " + USER_INFO_TABLE + " WHERE user_id = ?";
+        long rank = FactionUser.DEFAULT_RANK_ID;
+        try (PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setLong(1, ID);
+            try (ResultSet set = statement.executeQuery()) {
+                set.next();
+                rank = set.getLong("Ranks");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rank;
     }
 
     public static Loadout getInventory(long ID, int loadoutNumber) {
@@ -328,7 +398,7 @@ public class SQLConfig {
 
     public static boolean isMaxInventory(long ID) {
         boolean max = false;
-        String query = "SELECT COUNT(*) from " + USER_INVENTORY_TABLE +" WHERE user_id = ? AND inventory IS TRUE";
+        String query = "SELECT COUNT(*) from " + USER_INVENTORY_TABLE + " WHERE user_id = ? AND inventory IS TRUE";
         try (PreparedStatement statment = conn.prepareStatement(query)) {
             statment.setLong(1, ID);
             try (ResultSet set = statment.executeQuery()) {
