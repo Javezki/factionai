@@ -17,7 +17,7 @@ public class FactionUser {
     private Loadout loadout1;
     private Loadout loadout2;
     private Loadout loadout3;
-    public static long defaultRankID = 1088178490643320872L;
+    public static long DEFAULT_RANK_ID = 1088178490643320872L;
     public final static int INVENTORY_SIZE = 5;
     public final static int LOADOUT_SIZE = 3;
 
