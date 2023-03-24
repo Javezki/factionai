@@ -71,6 +71,14 @@ public class AppTest
         SQLConfig.setRank(id, 123456);
         assertEquals(123456, SQLConfig.getRankLong(id));
     }
+    @Test
+    public void displayAllLoadouts() {
+        for (Loadout loadout : SQLConfig.getAllLoadouts(id)) {
+            System.out.println("Primary: " + loadout.getPrimary().getName());
+            System.out.println("Secondary:" + loadout.getSecondary().getName());
+            System.out.println("Melee: " + loadout.getMelee().getName());
+        }
+    }
 
 }
 
