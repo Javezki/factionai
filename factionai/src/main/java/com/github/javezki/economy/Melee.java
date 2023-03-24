@@ -2,7 +2,7 @@ package com.github.javezki.economy;
 
 public enum Melee {
     
-    DOWNRANGE("Downrage", 0);
+    NONE("None", 0), DOWNRANGE("Downrage", 0);
 
     private String name;
     private double price;

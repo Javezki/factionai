@@ -2,6 +2,7 @@ package com.github.javezki.economy;
 
 public enum Secondary {
     
+    NONE("None", 0), 
     B75("B-75", 0);
 
     private String name;

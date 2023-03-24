@@ -2,6 +2,7 @@ package com.github.javezki.economy;
 
 public enum Primary {
 
+    NONE("None", 0), 
     AA_12("AA-12", 500),
     AK_74N("AK74N", 0);
 
